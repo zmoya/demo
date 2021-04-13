@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>2048</title>
+        <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js"></script> <!-- 引用第三方js，Jquery.js -->
+        <style type="text/css">
+            /* 页面样式代码填写的地方 */
+            .content { 
+                width: 400px;
+                height: 400px;
+                background: rgba(128, 128, 128, 0.6); /* 第四个参数是透明度 */
+                margin: 0 auto; /* 让div居中 */
+            }
+
+            .item {
+                width: 94px; /* 小块的宽度 */
+                height: 94px; /* 小块的高度 */
+                margin: 3px; /* 小块的外边距，这里是上下左右一起设置的 */
+                background: #d3d3d3; /* 小块的背景颜色 */
+                border-radius: 10px; /* 设置小块边角位圆角 */
+                line-height: 94px; /* 上下居中 */
+                text-align: center; /* 左右居中 */
+                font-size: 32px; /* 字体大小 */
+                float: left;
+            }
+
+            .item-2 {background-color: white; color: #757070;}
+            .item-4 {background-color: #fbf4d8; color: #757070;}
+            .item-8 {background-color: #f5ba73; color: white;}
+            .item-16 {background-color: #e08c5f; color: white;}
+            .item-32 {background-color: #fb774d; color: white;}
+            .item-64 {background-color: #f44336; color: white;}
+            .item-128 {background-color: #f5d575; color: white;}
+            .item-256 {background-color: #ffc107; color: white;}
+            .item-512 {background-color: #ff9800; color: white;}
+            .item-1024 {background-color: #ffca28; color: white;}
+            .item-2048 {background-color: #795548; color: white;}
+            .item-4096 {background-color: #8bc34a; color: white;}
+        </style>
+        <script type="text/javascript">
+            // 写js逻辑代码的地方
+
+            // 游戏数据的数组
+            var dataArr = [
+                [0,0,0,8],
+                [2,2,4,0],
+                [0,2,2,0],
+                [2,16,2,2]
+            ]
+
+            // jQuery的启动进入方法，页面加载后，会从这里运行。
+            $(function() {
+                console.log('进入启动方法')
+
+                drawGame()
+
+                // 键盘监听方法，在启动方法里面绑定键盘监听事件，这样在按键盘的时候，就可以捕获事件，进行处理
+                $(window).keydown(function(event){
+                    // console.log(event.which) // 打印敲击键盘按键的值
+                    switch (event.which) {
+                        case 38: // 上
+                            console.log('上')
+                            // 循环遍历，一列一列的进行处理
+                            for (var i = 0; i < 4; i++) {
+                                // 去0位移算法，强调，数组下标是从0开始的
+                                if (dataArr[2][i] == 0) { // 第3位如果为0，则第4位设置到第3位，第4位补0
+                                    dataArr[2][i] = dataArr[3][i]
+                                    dataArr[3][i] = 0
+                                }
+                                if (dataArr[1][i] == 0) { // 第2位如果为0，则后面2位依次迁移，最后补0
+                                    dataArr[1][i] = dataArr[2][i]
+                                    dataArr[2][i] = dataArr[3][i]
+                                    dataArr[3][i] = 0
+                                }
+                                if (dataArr[0][i] == 0) { // 第1位如果为0，则后面3位依次迁移，最后补0
+                                    dataArr[0][i] = dataArr[1][i]
+                                    dataArr[1][i] = dataArr[2][i]
+                                    dataArr[2][i] = dataArr[3][i]
+                                    dataArr[3][i] = 0
+                                }
+
+                                // 合并算法，经过上面先去0位移，合并的情况仅仅只有三种了，
+                                if (dataArr[0][i] == dataArr[1][i]) { // xxab情况，变为：(2x)0ab
+                                    dataArr[0][i] *= 2
+                                    dataArr[1][i] = 0
+                                }
+                                if (dataArr[1][i] == dataArr[2][i]) { // axxb情况，变为：a(2x)0b
+                                    dataArr[1][i] *= 2
+                                    dataArr[2][i] = 0
+                                }
+                                if (dataArr[2][i] == dataArr[3][i]) { // abxx情况，变为：ab(2x)0
+                                    dataArr[2][i] *= 2
+                                    dataArr[3][i] = 0
+                                }
+
+                                // 复制上面的去0算法
+                                if (dataArr[2][i] == 0) { // 第3位如果为0，则第4位设置到第3位，第4位补0
+                                    dataArr[2][i] = dataArr[3][i]
+                                    dataArr[3][i] = 0
+                                }
+                                if (dataArr[1][i] == 0) { // 第2位如果为0，则后面2位依次迁移，最后补0
+                                    dataArr[1][i] = dataArr[2][i]
+                                    dataArr[2][i] = dataArr[3][i]
+                                    dataArr[3][i] = 0
+                                }
+                                if (dataArr[0][i] == 0) { // 第1位如果为0，则后面3位依次迁移，最后补0
+                                    dataArr[0][i] = dataArr[1][i]
+                                    dataArr[1][i] = dataArr[2][i]
+                                    dataArr[2][i] = dataArr[3][i]
+                                    dataArr[3][i] = 0
+                                }
+                            }
+
+                            drawGame()
+
+                            break;
+                        case 40: // 下
+                            console.log('下')
+                            // 循环遍历，一列一列的进行处理
+                            for (var col = 0; col < 4; col++) {
+                                // 去0位移算法优化版，先找到0，然后往后找，找到一个不等于0的，就设置到前面去。
+                                // 这个优化版与上一个版本，不同在于，上一个版本是如果这个位置为0，则后面所有的值往前移，不管是不是0都移。
+                                // 而这个优化版本，是如果这个位置是0，则往后找一个不是0的，就把这个不是0的移动到前面这个0的位置，其余不变。
+                                // 所以上一个版本，必须从后往前找，否则会出现问题。而优化版本，需要从前往后找。可以思考下，如果不改变算法，反过来一定会有问题的。
+                                for (var i = 3; i >= 1; i--) { 
+                                    if (dataArr[i][col] == 0) {
+                                        for (var j = i - 1; j >= 0; j--) {
+                                            if (dataArr[j][col] != 0) {
+                                                dataArr[i][col] = dataArr[j][col]
+                                                dataArr[j][col] = 0
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // 合并算法，和第一个算法的合并算法，思路是一模一样的，仅仅是用循环简化了写法，相邻的两个就为i和i-1了
+                                for (var i = 3; i >= 1; i--) {
+                                    if (dataArr[i][col] == dataArr[i-1][col]) {
+                                        dataArr[i][col] *= 2
+                                        dataArr[i-1][col] = 0
+                                    }
+                                }
+
+                                // 复制上面的去0算法
+                                for (var i = 3; i >= 1; i--) {
+                                    if (dataArr[i][col] == 0) {
+                                        for (var j = i - 1; j >= 0; j--) {
+                                            if (dataArr[j][col] != 0) {
+                                                dataArr[i][col] = dataArr[j][col]
+                                                dataArr[j][col] = 0
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            drawGame()
+
+                            break;
+                        case 37: // 左
+                            console.log('左')
+                            // 由于向左了，所以外层遍历由列变为了行了，注意区分
+                            for (var line = 0; line < 4; line++) { // 行
+                                for (var i = 0; i < 3; i++) { // 外层循环，仅需循环前3个即可
+                                    if (dataArr[line][i] == 0) { // 判断是否为0，如果为0，则后续位全部往前移动1格，不需要多移动的，外层循环会确保后续会继续移动
+                                        for (var j = i+1; j < 4; j++) { // j从i+1开始，及从外层循环的下一个开始
+                                            if (dataArr[line][j] != 0) { // 仅需将下一个不为0的往前移动到i的位置，然后将j的位置置为0
+                                                dataArr[line][i] = dataArr[line][j]
+                                                dataArr[line][j] = 0
+                                                i--
+                                                break
+                                            }
+                                        }
+                                    } else { // 判断当前位如果不为0
+                                        for (var j = i+1; j < 4; j++) { // 则开始找下一个不为0的，如果为0，继续找下一个
+                                            if (dataArr[line][j] != 0) { // 当找到下一个不为0的
+                                                if (dataArr[line][i] == dataArr[line][j]) { // 如果下一个不为0的，等于当前位，则当前位乘以2，j位置置为0
+                                                    dataArr[line][i] *= 2
+                                                    dataArr[line][j] = 0
+                                                }
+                                                break // 这里为什么可以直接退出循环，因为有外层的i这个循环，后续的情况都会依次处理到的，所以直接退出即可。
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            drawGame()
+
+                            break;
+                        case 39: // 右
+                            console.log('右')
+                            // 参考上面向左的算法思路即可
+                            for (var line = 0; line < 4; line++) { // 行
+                                for (var i = 3; i >= 1; i--) {
+                                    if (dataArr[line][i] == 0) {
+                                        for (var j = i-1; j >= 0; j--) {
+                                            if (dataArr[line][j] != 0) {
+                                                dataArr[line][i] = dataArr[line][j]
+                                                dataArr[line][j] = 0
+                                                i++
+                                                break
+                                            }
+                                        }
+                                    } else {
+                                        for (var j = i-1; j >= 0; j--) {
+                                            if (dataArr[line][j] != 0) {
+                                                if (dataArr[line][i] == dataArr[line][j]) {
+                                                    dataArr[line][i] *= 2
+                                                    dataArr[line][j] = 0
+                                                }
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            drawGame()
+
+                            break;
+                        default:
+                            break;
+                    }
+                })
+            })
+
+            // 根据数组，将所有块都展示出来
+            function drawGame() {
+                randomItem() // 在这里进行随机块的触发
+
+                var htmlStr = "" // 定义一个变量，用于储存过程中的html的值
+                
+                // console.log('第一种循环，foreach')
+                dataArr.forEach(lineArr => { // 循环遍历行
+                    lineArr.forEach(item => { // 循环遍历每行的列
+                        if (item == 0) {
+                            htmlStr += '<div class="item fleft"></div>'
+                        } else {
+                            htmlStr += '<div class="item item-' + item + ' fleft">' + item + '</div>'
+                        }
+                    });
+                });
+
+                $('.content').html(htmlStr) // 将htmlStr字符串，写入到class为content的标签里面
+            }
+
+            // 生成随机块
+            function randomItem() {
+                var has0 = false // 默认为false，表示先认为没有为0的
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 0; j < 4; j++) {
+                        if (dataArr[i][j] == 0) { // 通过循环，找到一个为0的，则设置has0为true，后续就可以随机了
+                            has0 = true
+                            break
+                        }
+                    }
+                }
+                if (has0) { // 如果has0为true，说明有空的，这可以随机
+                    var line = parseInt(Math.random() * 4) // 随机行
+                    var col = parseInt(Math.random() * 4) // 随机列
+
+                    if (dataArr[line][col] == 0) { // 如果当前块等于0，则设置为0
+                        dataArr[line][col] = (parseInt(Math.random() * 10) == 0 ? 4 : 2 )// 十分之一的概率为4，十分之九的概率为2
+                    } else { // 如果当前块不为0，则从新生产随机块
+                        randomItem()
+                    }
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <!-- 页面写的地方 -->
+        <div class="content">
+        </div>
+    </body>
+</html>
+
+
